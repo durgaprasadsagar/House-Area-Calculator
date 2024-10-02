@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arjun Prasad's House Area Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        input, select {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .no-print {
+            display: block;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Arjun Prasad's House Area Calculator in Sqft</h2>
+
+    <table id="areaTable">
+        <thead>
+            <tr>
+                <th>Select Area</th>
+                <th>Length (ft)</th>
+                <th>Breadth (ft)</th>
+                <th>Price per Sq. Ft (₹)</th>
+                <th>Total Area (Sq. Ft)</th>
+                <th>Total Price (₹)</th>
+                <th class="no-print">Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="row1">
+                <td>
+                    <select id="areaType1">
+                        <option value="">Select</option>
+                        <option value="Ground Floor">Ground Floor</option>
+                        <option value="1st Floor">1st Floor</option>
+                        <option value="2nd Floor">2nd Floor</option>
+                        <option value="Bathroom">Bathroom</option>
+                    </select>
+                </td>
+                <td><input type="number" id="length1" oninput="calculateRow(1)" placeholder="Enter length"></td>
+                <td><input type="number" id="breadth1" oninput="calculateRow(1)" placeholder="Enter breadth"></td>
+                <td><input type="number" id="pricePerSqft1" oninput="calculateRow(1)" placeholder="Enter price per square foot"></td>
+                <td id="totalArea1">0</td>
+                <td id="totalPrice1">₹0</td>
+                <td class="no-print"><button class="remove-btn" onclick="removeRow(1)">Remove</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="no-print" onclick="addRow()">Add Another Area</button>
+    <button class="no-print" onclick="calculateGrandTotal()">Calculate Total</button>
+
+    <div class="result" id="resultArea">
+        <!-- Grand Total will be displayed here -->
+    </div>
+
+    <button class="no-print" onclick="window.print()">Print</button>
+</div>
+
+<script>
+    let rowCount = 1;
+
+    function addRow() {
+        rowCount++;
+        const table = document.getElementById('areaTable').getElementsByTagName('tbody')[0];
+        const newRow = document.createElement('tr');
+        newRow.id = `row${rowCount}`;
+
+        newRow.innerHTML = `
+            <td>
+                <select id="areaType${rowCount}">
+                    <option value="">Select</option>
+                    <option value="Ground Floor">Ground Floor</option>
+                    <option value="1st Floor">1st Floor</option>
+                    <option value="2nd Floor">2nd Floor</option>
+                    <option value="Bathroom">Bathroom</option>
+                </select>
+            </td>
+            <td><input type="number" id="length${rowCount}" oninput="calculateRow(${rowCount})" placeholder="Enter length"></td>
+            <td><input type="number" id="breadth${rowCount}" oninput="calculateRow(${rowCount})" placeholder="Enter breadth"></td>
+            <td><input type="number" id="pricePerSqft${rowCount}" oninput="calculateRow(${rowCount})" placeholder="Enter price per square foot"></td>
+            <td id="totalArea${rowCount}">0</td>
+            <td id="totalPrice${rowCount}">₹0</td>
+            <td class="no-print"><button class="remove-btn" onclick="removeRow(${rowCount})">Remove</button></td>
+        `;
+
+        table.appendChild(newRow);
+    }
+
+    function removeRow(id) {
+        const row = document.getElementById(`row${id}`);
+        row.remove();
+        calculateGrandTotal(); // Recalculate grand total after row removal
+    }
+
+    function calculateRow(id) {
+        const length = parseFloat(document.getElementById(`length${id}`).value) || 0;
+        const breadth = parseFloat(document.getElementById(`breadth${id}`).value) || 0;
+        const pricePerSqft = parseFloat(document.getElementById(`pricePerSqft${id}`).value) || 0;
+
+        const totalArea = length * breadth;
+        const totalPrice = totalArea * pricePerSqft;
+
+        document.getElementById(`totalArea${id}`).innerText = totalArea.toFixed(2);
+        document.getElementById(`totalPrice${id}`).innerText = `₹${totalPrice.toLocaleString()}`;
+
+        calculateGrandTotal(); // Update grand total after every row calculation
+    }
+
+    function calculateGrandTotal() {
+        let grandTotalArea = 0;
+        let grandTotalPrice = 0;
+        let resultHtml = '';
+
+        for (let i = 1; i <= rowCount; i++) {
+            if (document.getElementById(`row${i}`)) {
+                const areaType = document.getElementById(`areaType${i}`).value || 'Not selected';
+                const totalArea = parseFloat(document.getElementById(`totalArea${i}`).innerText) || 0;
+                const totalPrice = parseFloat(document.getElementById(`totalPrice${i}`).innerText.replace('₹', '').replace(/,/g, '')) || 0;
+
+                grandTotalArea += totalArea;
+                grandTotalPrice += totalPrice;
+
+                // Include area name in the summary
+                resultHtml += `
+                    <p><strong>Area Type:</strong> ${areaType}</p>
+                    <p><strong>Total Area:</strong> ${totalArea.toFixed(2)} sq. ft.</p>
+                    <p><strong>Total Price:</strong> ₹${totalPrice.toLocaleString()}</p>
+                    <hr>
+                `;
+            }
+        }
+
+        resultHtml += `
+            <h3>Grand Total</h3>
+            <p><strong>Total Area:</strong> ${grandTotalArea.toFixed(2)} sq. ft.</p>
+            <p><strong>Total Price:</strong> ₹${grandTotalPrice.toLocaleString()}</p>
+        `;
+
+        document.getElementById('resultArea').innerHTML = resultHtml;
+    }
+</script>
+
+</body>
+</html>
